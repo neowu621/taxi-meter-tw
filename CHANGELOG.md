@@ -2,6 +2,11 @@
 
 版本格式：`YYYYMMDD_NN`（NN 為全域單調遞增計數器，每次發佈 +1，跨日不重置）。
 
+## 20260621_01 — 修正 Zeabur 部署服務埠
+
+- nginx 改監聽 8080（Zeabur 預設 HTTP 服務埠），Dockerfile `EXPOSE 8080`。
+- 修正初次部署 502/404（gateway 綁定 8080、nginx 卻監聽 80）。
+
 ## 20260621_00 — 初版骨架
 
 - 專案建立：Vite + TypeScript（strict）+ vite-plugin-pwa。
