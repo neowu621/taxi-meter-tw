@@ -1,0 +1,33 @@
+import { defineConfig } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
+
+// 純前端 PWA：可加到手機主畫面、離線可用。
+// base 用相對路徑，部署到任何 host（含子路徑）都不會壞。
+export default defineConfig({
+  base: "./",
+  plugins: [
+    VitePWA({
+      registerType: "autoUpdate",
+      includeAssets: ["icon.svg", "fonts/DSEG7Classic-Bold.woff2"],
+      manifest: {
+        name: "大台北計程車計費器",
+        short_name: "計費器",
+        description: "大台北計程車計費器（自用/估價）",
+        lang: "zh-Hant-TW",
+        theme_color: "#15171a",
+        background_color: "#15171a",
+        display: "standalone",
+        orientation: "any",
+        start_url: "./",
+        scope: "./",
+        icons: [
+          { src: "icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any maskable" },
+        ],
+      },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,svg,woff2,png}"],
+        navigateFallback: "index.html",
+      },
+    }),
+  ],
+});

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"
+    />
+    <meta name="theme-color" content="#15171a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+    <title>大台北計程車計費器</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <span class="brand"><span class="brand-dot"></span> 計程車計費器</span>
+        <div class="topbar-right">
+          <span class="ver" id="ver">v—</span>
+          <button class="icon-btn" id="open-settings" aria-label="設定">⚙</button>
+        </div>
+      </header>
+
+      <div class="layout-toggle" role="tablist">
+        <button data-layout="portrait" class="on" type="button">直向</button>
+        <button data-layout="landscape" type="button">橫向</button>
+      </div>
+
+      <!-- 直向 -->
+      <section class="device device--portrait" data-view="portrait">
+        <div class="grille"><i></i><i class="bar"></i><i></i></div>
+        <div class="lcd">
+          <div class="lcd-top">
+            <span class="status v-status">空車待命</span>
+            <span class="clock v-clock">--:--:--</span>
+          </div>
+          <div class="lcd-main">
+            <div class="timer-box">
+              <div class="lbl">本趟計時</div>
+              <div class="seg v-time timer">00:00:00</div>
+            </div>
+            <div class="fare-box">
+              <span class="lbl">車資</span>
+              <span class="fare-wrap">
+                <span class="seg ghost">8888</span>
+                <span class="seg v-fare fare">85</span>
+              </span>
+              <span class="unit">元</span>
+            </div>
+          </div>
+          <div class="lcd-sub">
+            <div class="dist">
+              <span class="lbl">里程</span>
+              <span class="seg v-dist">0.00</span><span class="lbl">km</span>
+              <span class="gps v-gps"><span class="dot"></span>GPS</span>
+            </div>
+            <div class="fees">
+              <div>通行費 <span class="seg v-toll">0</span> 元</div>
+              <div>均速 <span class="seg v-avg">0</span> km/h</div>
+            </div>
+          </div>
+          <div class="lamps">
+            <span class="lamp lamp-hw">一般道路</span>
+            <span class="lamp lamp-period">日間</span>
+            <span class="board">上車 <span class="v-board">--:--</span></span>
+          </div>
+        </div>
+        <div class="keys">
+          <button class="key act-clear" type="button">空</button>
+          <button class="key key--go act-start" type="button">計程計時</button>
+          <button class="key act-stop" type="button">停</button>
+          <button class="key key--hw act-hw" type="button">高速公路<small class="v-hwmode">自動</small></button>
+          <button class="key act-print" type="button">列印</button>
+        </div>
+      </section>
+
+      <!-- 橫向 -->
+      <section class="device device--landscape" data-view="landscape" hidden>
+        <div class="lcd">
+          <div class="lcd-main">
+            <div class="timer-box">
+              <div class="lbl">本趟計時</div>
+              <div class="seg v-time timer">00:00:00</div>
+            </div>
+            <span class="status v-status">空車待命</span>
+            <div class="fare-box">
+              <span class="lbl">車資</span>
+              <span class="fare-wrap">
+                <span class="seg ghost">8888</span>
+                <span class="seg v-fare fare">85</span>
+              </span>
+              <span class="unit">元</span>
+            </div>
+          </div>
+          <div class="lcd-sub">
+            <div class="dist">
+              <span class="lbl">里程</span>
+              <span class="seg v-dist">0.00</span><span class="lbl">km</span>
+              <span class="lbl">均速 <span class="seg v-avg">0</span></span>
+            </div>
+            <div class="fees">
+              <div>通行費 <span class="seg v-toll">0</span> 元</div>
+              <div>上車 <span class="v-board">--:--</span></div>
+            </div>
+          </div>
+          <div class="lamps">
+            <span class="lamp lamp-hw">一般道路</span>
+            <span class="lamp lamp-period">日間</span>
+          </div>
+        </div>
+        <div class="keys">
+          <button class="key act-clear" type="button">空</button>
+          <button class="key key--go act-start" type="button">計程計時</button>
+          <button class="key act-stop" type="button">停</button>
+          <button class="key key--hw act-hw" type="button">高速公路<small class="v-hwmode">自動</small></button>
+          <button class="key act-print" type="button">列印</button>
+        </div>
+      </section>
+
+      <div class="stats">
+        <div class="stat"><span class="stat-lbl">今日趟次</span><span class="stat-val v-trips">0</span></div>
+        <div class="stat"><span class="stat-lbl">今日收入</span><span class="stat-val v-rev">0</span></div>
+      </div>
+
+      <div class="receipt" hidden></div>
+
+      <details class="panel" id="settings">
+        <summary>測試 / 設定</summary>
+        <div class="panel-body">
+          <label class="row">
+            <span>定位來源</span>
+            <select id="src-mode">
+              <option value="gps">真實 GPS</option>
+              <option value="sim">模擬（室內測試）</option>
+            </select>
+          </label>
+          <div class="row sim-only">
+            <span>模擬時速</span>
+            <input type="range" id="sim-speed" min="0" max="120" step="1" value="30" />
+            <span class="sim-out" id="sim-out">30</span>
+          </div>
+          <div class="row sim-only presets">
+            <button data-sim="0" type="button">塞車</button>
+            <button data-sim="30" type="button">市區</button>
+            <button data-sim="60" type="button">快速</button>
+            <button data-sim="95" type="button">國道</button>
+          </div>
+          <label class="row"><span>春節加成 (+30)</span><input type="checkbox" id="cny" /></label>
+          <label class="row"><span>強制夜間時段</span><input type="checkbox" id="night-force" /></label>
+          <button class="reset" id="reset-stats" type="button">歸零今日統計</button>
+        </div>
+      </details>
+
+      <footer class="disclaimer">
+        ※ 本工具為司機自用 / 估價參考，依 GPS 估算，<b>非經檢定合格之計程車計費器</b>，不得作為正式收費依據。
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
