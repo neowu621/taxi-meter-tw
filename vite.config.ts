@@ -36,6 +36,17 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,woff2,png}"],
         navigateFallback: "index.html",
+        // 國道圖資不進首屏預快取，首次抓取後以 CacheFirst 快取供離線使用
+        runtimeCaching: [
+          {
+            urlPattern: /freeways\.json$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "freeways",
+              expiration: { maxEntries: 1, maxAgeSeconds: 60 * 60 * 24 * 180 },
+            },
+          },
+        ],
       },
     }),
   ],

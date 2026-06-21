@@ -10,6 +10,10 @@ export interface GeoSample {
   accuracy: number;
   /** 訊號品質：good / weak / lost */
   quality: "good" | "weak" | "lost";
+  /** 目前緯度（無定位時為 NaN） */
+  lat: number;
+  /** 目前經度（無定位時為 NaN） */
+  lng: number;
 }
 
 const R_EARTH = 6371000; // 公尺
@@ -57,7 +61,7 @@ export class GeoTracker {
     this.hasFix = false;
     this.watchId = navigator.geolocation.watchPosition(
       (pos) => this.handle(pos),
-      () => this.onSample({ distanceDelta: 0, speedKmh: 0, accuracy: 9999, quality: "lost" }),
+      () => this.onSample({ distanceDelta: 0, speedKmh: 0, accuracy: 9999, quality: "lost", lat: NaN, lng: NaN }),
       { enableHighAccuracy: true, maximumAge: 1000, timeout: 12000 },
     );
   }
@@ -78,7 +82,7 @@ export class GeoTracker {
       this.lastLon = longitude;
       this.lastTime = now;
       this.hasFix = true;
-      this.onSample({ distanceDelta: 0, speedKmh: 0, accuracy, quality: this.qualityOf(accuracy) });
+      this.onSample({ distanceDelta: 0, speedKmh: 0, accuracy, quality: this.qualityOf(accuracy), lat: latitude, lng: longitude });
       return;
     }
 
@@ -100,7 +104,7 @@ export class GeoTracker {
     this.lastTime = now;
 
     if (speedKmh > this.maxSpeedKmh) speedKmh = 0;
-    this.onSample({ distanceDelta: delta, speedKmh, accuracy, quality });
+    this.onSample({ distanceDelta: delta, speedKmh, accuracy, quality, lat: latitude, lng: longitude });
   }
 
   private qualityOf(accuracy: number): GeoSample["quality"] {

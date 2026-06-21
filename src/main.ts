@@ -9,6 +9,7 @@ import {
   type GeoSample,
 } from "./geo.ts";
 import { HighwayDetector } from "./highway.ts";
+import { loadFreeways, freewaysReady, isOnFreeway } from "./freeway.ts";
 import {
   newTrip,
   highwayActive,
@@ -25,6 +26,10 @@ let st: TripState = newTrip();
 let stats = loadStats();
 let sourceMode: "gps" | "sim" = "gps";
 let currentSpeedKmh = 0;
+let currentLat = NaN;
+let currentLng = NaN;
+let fwOn = 0;
+let fwOff = 0;
 let nightForce = false;
 let cny = false;
 let timer: number | null = null;
@@ -33,6 +38,8 @@ let gpsActive = false;
 const detector = new HighwayDetector();
 const tracker = new GeoTracker((s) => {
   currentSpeedKmh = s.speedKmh;
+  currentLat = s.lat;
+  currentLng = s.lng;
   updateGps(s);
   if (st.mode === "running" && s.speedKmh >= rate.slowSpeedKmh) {
     st.distanceM += s.distanceDelta;
@@ -99,7 +106,8 @@ function render() {
   setText("v-trips", stats.trips);
   setText("v-rev", stats.revenue.toLocaleString("en-US"));
   setText("v-status", st.mode === "idle" ? "空車待命" : st.mode === "running" ? "計費中" : "停車結帳");
-  setText("v-hwmode", st.highwayOverride === null ? "自動" : st.highwayOverride ? "手動開" : "手動關");
+  const autoLabel = sourceMode === "gps" && freewaysReady() ? "自動·圖資" : "自動";
+  setText("v-hwmode", st.highwayOverride === null ? autoLabel : st.highwayOverride ? "手動開" : "手動關");
 
   const running = st.mode === "running";
   document.body.classList.toggle("metering", running);
@@ -133,7 +141,7 @@ function tick() {
   }
 
   if (currentSpeedKmh < rate.slowSpeedKmh) st.slowSec += 1;
-  st.highwayAuto = detector.update(currentSpeedKmh);
+  st.highwayAuto = computeHighwayAuto();
   render();
 }
 
@@ -150,9 +158,27 @@ function stopLoop() {
 // GPS 模式下持續定位，讓訊號與車速即時顯示（距離只在計費中才累計）
 function ensureGps() {
   if (gpsActive || sourceMode !== "gps" || !GeoTracker.supported) return;
+  void loadFreeways(); // 延遲載入離線國道圖資
   tracker.start();
   gpsActive = true;
-  updateGps({ distanceDelta: 0, speedKmh: 0, accuracy: 9999, quality: "lost" });
+  updateGps({ distanceDelta: 0, speedKmh: 0, accuracy: 9999, quality: "lost", lat: NaN, lng: NaN });
+}
+
+// 自動模式的高速判定：優先用離線國道圖資確認在不在高速公路上，圖資未就緒則退回速度啟發式
+function computeHighwayAuto(): boolean {
+  if (sourceMode === "gps" && freewaysReady() && !Number.isNaN(currentLat)) {
+    if (isOnFreeway(currentLat, currentLng)) {
+      fwOn += 1;
+      fwOff = 0;
+      if (fwOn >= 2) return true;
+    } else {
+      fwOff += 1;
+      fwOn = 0;
+      if (fwOff >= 4) return false;
+    }
+    return st.highwayAuto; // 遲滯：維持目前狀態
+  }
+  return detector.update(currentSpeedKmh);
 }
 function stopGps() {
   tracker.stop();
@@ -191,6 +217,8 @@ function onClear() {
   void releaseWakeLock();
   st = newTrip();
   detector.reset();
+  fwOn = 0;
+  fwOff = 0;
   currentSpeedKmh = 0;
   ($(".receipt") as HTMLElement).hidden = true;
   render();
