@@ -301,11 +301,14 @@ body.metering .run-dot {
     opacity: 0;
   }
 }
-.spd {
+.gps-spd {
+  margin-left: 5px;
+  padding-left: 5px;
+  border-left: 1px solid rgba(20, 33, 10, 0.3);
   white-space: nowrap;
 }
-.spd .seg {
-  font-size: 13px;
+.gps-spd .seg {
+  font-size: 12px;
 }
 .lamp {
   flex: 1;
@@ -478,7 +481,7 @@ body.op-active {
   height: 3vmin;
   margin-right: 1.4vmin;
 }
-.op-active .device--landscape .spd .seg {
+.op-active .device--landscape .gps-spd .seg {
   font-size: 4.4vmin;
 }
 .op-active .device--landscape .unit {

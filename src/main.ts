@@ -28,6 +28,7 @@ let currentSpeedKmh = 0;
 let nightForce = false;
 let cny = false;
 let timer: number | null = null;
+let gpsActive = false;
 
 const detector = new HighwayDetector();
 const tracker = new GeoTracker((s) => {
@@ -73,6 +74,8 @@ function updateGps(s: GeoSample) {
     const t = e.querySelector(".v-gpstxt");
     if (t) t.textContent = txt;
   });
+  // GPS 即時車速顯示在訊號旁（透過 GPS 取得）
+  setText("v-speed", Math.round(s.speedKmh));
 }
 
 function setGpsLabel(text: string) {
@@ -144,6 +147,18 @@ function stopLoop() {
   }
 }
 
+// GPS 模式下持續定位，讓訊號與車速即時顯示（距離只在計費中才累計）
+function ensureGps() {
+  if (gpsActive || sourceMode !== "gps" || !GeoTracker.supported) return;
+  tracker.start();
+  gpsActive = true;
+  updateGps({ distanceDelta: 0, speedKmh: 0, accuracy: 9999, quality: "lost" });
+}
+function stopGps() {
+  tracker.stop();
+  gpsActive = false;
+}
+
 // ---- actions ----
 function onStart() {
   if (st.mode === "running") return;
@@ -153,10 +168,7 @@ function onStart() {
   }
   st.mode = "running";
   ($(".receipt") as HTMLElement).hidden = true;
-  if (sourceMode === "gps") {
-    tracker.start();
-    updateGps({ distanceDelta: 0, speedKmh: 0, accuracy: 9999, quality: "lost" });
-  }
+  ensureGps();
   void requestWakeLock();
   startLoop();
   render();
@@ -166,7 +178,6 @@ function onStop() {
   if (st.mode !== "running") return;
   st.mode = "stopped";
   stopLoop();
-  tracker.stop();
   void releaseWakeLock();
   render();
 }
@@ -177,7 +188,6 @@ function onClear() {
     stats = recordTrip(fare().total);
   }
   stopLoop();
-  tracker.stop();
   void releaseWakeLock();
   st = newTrip();
   detector.reset();
@@ -239,15 +249,11 @@ srcSel.addEventListener("change", () => {
   sourceMode = srcSel.value as "gps" | "sim";
   document.getElementById("app")!.classList.toggle("sim", sourceMode === "sim");
   if (sourceMode === "sim") {
-    tracker.stop();
+    stopGps();
+    setText("v-speed", 0);
     setGpsLabel("模擬");
   } else {
-    if (st.mode === "running") {
-      tracker.start();
-      updateGps({ distanceDelta: 0, speedKmh: 0, accuracy: 9999, quality: "lost" });
-    } else {
-      setGpsLabel("待定位");
-    }
+    ensureGps();
   }
 });
 
@@ -342,6 +348,7 @@ function maybeShowIosHint() {
 }
 function enterOperating() {
   document.body.classList.add("op-active");
+  ensureGps();
   const p = document.documentElement.requestFullscreen?.();
   if (p) {
     p.then(() => (screen.orientation as unknown as { lock?: (o: string) => Promise<void> })?.lock?.("landscape")?.catch?.(() => {})).catch(() => {});
