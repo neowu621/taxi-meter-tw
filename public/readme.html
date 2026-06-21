@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>大台北計程車計費器 · 使用說明</title>
+    <style>
+      @font-face {
+        font-family: "DSEG7";
+        src: url("/fonts/DSEG7Classic-Bold.woff2") format("woff2");
+        font-weight: 700;
+        font-display: swap;
+      }
+      :root {
+        --lcd: #9ed91a;
+        --ink: #14210a;
+        --frame: #15171a;
+        --bg: #0c0d0f;
+        --card: #16181b;
+        --line: #2c2f33;
+        --txt: #e8eaed;
+        --muted: #9aa0a6;
+        --hw: #1565c0;
+        --go: #c62828;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--txt);
+        font-family: -apple-system, "Segoe UI", "Microsoft JhengHei", system-ui, sans-serif;
+        line-height: 1.7;
+      }
+      .wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+      header { text-align: center; padding: 20px 0 8px; }
+      .badge { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+      .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--lcd); }
+      h1 { font-size: 26px; margin: 10px 0 6px; }
+      h2 { font-size: 19px; margin: 36px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+      h3 { font-size: 15px; margin: 18px 0 6px; }
+      p { margin: 8px 0; }
+      a { color: #6db1ff; }
+      .lead { color: var(--muted); font-size: 15px; }
+      .cta {
+        display: inline-block; margin-top: 14px; background: #243042; color: #cfe0ff;
+        border: 1px solid var(--hw); border-radius: 9px; padding: 10px 18px;
+        text-decoration: none; font-weight: 500;
+      }
+      .disclaimer {
+        background: #2a1d1d; border: 1px solid #4a2c2c; color: #f0c5c5;
+        border-radius: 10px; padding: 12px 16px; font-size: 14px; margin: 20px 0;
+      }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin: 12px 0; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      @media (max-width: 520px) { .grid { grid-template-columns: 1fr; } }
+      table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; }
+      th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { color: var(--muted); font-weight: 500; }
+      td:first-child { white-space: nowrap; color: #cdd2d8; }
+      ol, ul { margin: 8px 0; padding-left: 22px; }
+      li { margin: 5px 0; }
+      .key { display: inline-block; background: #23262a; color: #cfd2d6; border-radius: 6px; padding: 1px 8px; font-size: 13px; }
+      .key.go { background: var(--go); color: #fff; }
+      .key.hw { background: var(--hw); color: #fff; }
+      code { background: #1f2226; padding: 1px 6px; border-radius: 5px; font-size: 13px; }
+      footer { margin-top: 40px; text-align: center; color: var(--muted); font-size: 12px; }
+
+      /* 跳表預覽 */
+      .preview { display: flex; justify-content: center; margin: 18px 0; }
+      .meter { background: var(--frame); border-radius: 18px; padding: 12px; width: 320px; max-width: 100%; border: 1px solid var(--line); }
+      .lcd { background: var(--lcd); color: var(--ink); border-radius: 9px; padding: 12px 14px; font-family: var(--font-mono); }
+      .seg { font-family: "DSEG7", ui-monospace, monospace; font-weight: 700; }
+      .lrow { display: flex; justify-content: space-between; align-items: center; font-size: 11px; opacity: 0.82; }
+      .pill { background: var(--ink); color: var(--lcd); padding: 2px 8px; border-radius: 5px; font-weight: 600; }
+      .lmain { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 4px; }
+      .ltimer { font-size: 22px; }
+      .lfare { font-size: 50px; line-height: 0.95; text-align: right; }
+      .lsub { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 6px; border-top: 1px dashed rgba(20,33,10,.3); padding-top: 6px; font-size: 11px; }
+      .gpsbars { display: inline-flex; align-items: flex-end; gap: 2px; height: 11px; vertical-align: middle; margin-right: 3px; }
+      .gpsbars i { width: 3px; border-radius: 1px; background: #1f7a1f; }
+      .gpsbars i:nth-child(1){height:4px} .gpsbars i:nth-child(2){height:7px} .gpsbars i:nth-child(3){height:11px}
+      .lamps { display: flex; gap: 6px; margin-top: 7px; }
+      .lamp { flex: 1; text-align: center; font-size: 10px; font-weight: 600; padding: 3px; border-radius: 5px; background: rgba(20,33,10,.12); }
+      .lamp.hw { background: var(--hw); color: #fff; }
+      .pkeys { display: grid; grid-template-columns: repeat(5,1fr); gap: 5px; margin-top: 9px; }
+      .pkeys span { background: #23262a; color: #cfd2d6; border-radius: 7px; padding: 9px 2px; font-size: 11px; text-align: center; }
+      .pkeys span.go { background: var(--go); color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <span class="badge"><span class="dot"></span> 自用 / 估價工具 · v20260621_06</span>
+        <h1>大台北計程車計費器</h1>
+        <p class="lead">手機網頁版計程車跳表，給司機自用或估價參考。<br />純前端 PWA，可加到主畫面、離線可用。</p>
+        <a class="cta" href="/">開啟計費器 →</a>
+      </header>
+
+      <div class="disclaimer">
+        ⚠️ <b>法規定位</b>：本工具依手機 GPS 估算車資，<b>非經濟部標準檢驗局檢定合格之計程車計費器</b>，不得作為對乘客正式收費的依據。僅供司機自用 / 估價 / 教學參考。
+      </div>
+
+      <h2>畫面預覽</h2>
+      <div class="preview">
+        <div class="meter">
+          <div class="lcd">
+            <div class="lrow"><span class="pill">計費中</span><span>11:27</span></div>
+            <div class="lmain">
+              <div>
+                <div style="font-size:10px;opacity:.7">本趟計時</div>
+                <div class="seg ltimer">00:09:16</div>
+              </div>
+              <div>
+                <div style="font-size:11px;opacity:.7;text-align:right">車資</div>
+                <div class="seg lfare">110<span style="font-size:14px">元</span></div>
+              </div>
+            </div>
+            <div class="lsub">
+              <span>里程 <span class="seg" style="font-size:16px">1.36</span> km</span>
+              <span><span class="gpsbars"><i></i><i></i><i></i></span>8m · 時速 9</span>
+            </div>
+            <div class="lamps">
+              <span class="lamp">日間</span>
+              <span class="lamp hw">高速公路</span>
+            </div>
+          </div>
+          <div class="pkeys">
+            <span>空</span><span class="go">計程計時</span><span>停</span><span>高速</span><span>列印</span>
+          </div>
+        </div>
+      </div>
+
+      <h2>主要功能</h2>
+      <div class="grid">
+        <div class="card"><h3>📍 GPS 里程</h3>watchPosition + Haversine 計距，含訊號濾波；訊號差時退回時間計費。</div>
+        <div class="card"><h3>🧮 北北基跳表</h3>起跳 85、續程、延滯、夜間、春節加成，費率可在設定調整。</div>
+        <div class="card"><h3>🛣️ 高速自動偵測</h3>持續高速自動亮燈並估算過路費，可手動覆寫。</div>
+        <div class="card"><h3>🖥️ 全螢幕營業模式</h3>綠底跳表填滿整個螢幕、橫向呈現，像真機。</div>
+        <div class="card"><h3>🔋 螢幕常亮</h3>行車中 Wake Lock 防熄屏。</div>
+        <div class="card"><h3>📊 今日統計</h3>趟次 / 收入累計，存於手機本機。</div>
+      </div>
+
+      <h2>使用方式</h2>
+      <h3>五顆按鈕</h3>
+      <table>
+        <tr><th>按鈕</th><th>功能</th></tr>
+        <tr><td><span class="key">空</span></td><td>歸零、結算本趟並回待命（新乘客上車前按）</td></tr>
+        <tr><td><span class="key go">計程計時</span></td><td>開始跳表（變紅＝計費中）；停車後再按可續跳</td></tr>
+        <tr><td><span class="key">停</span></td><td>結束計費、鎖定金額</td></tr>
+        <tr><td><span class="key hw">高速公路</span></td><td>切換高速狀態：自動 → 手動開 → 手動關（循環）</td></tr>
+        <tr><td><span class="key">列印</span></td><td>顯示行程收據（估價明細）</td></tr>
+      </table>
+
+      <h3>全螢幕營業模式</h3>
+      <ol>
+        <li>點主畫面上方 <span class="key">⤢ 全螢幕營業模式</span></li>
+        <li>把手機<b>橫著架好</b>（直握會自動轉 90° 填滿螢幕）</li>
+        <li>按 <span class="key go">計程計時</span> 開始營業</li>
+        <li>右上角 <span class="key">✕</span> 退出</li>
+      </ol>
+
+      <h3>加到主畫面（變 App）</h3>
+      <p>用手機瀏覽器選單選「加到主畫面 / 安裝」，即可像原生 App 開啟、離線使用。</p>
+
+      <h2>GPS 訊號判讀</h2>
+      <ul>
+        <li><b>定位中…</b>（閃爍）：尚未取得定位</li>
+        <li><b>▮▮▮ 8m</b>：已定位，亮格越多＝越準；數字是精度（公尺，越小越好）</li>
+        <li>個位數～十幾公尺很好；&gt; 80m 表示訊號差（隧道 / 高樓）會變黃 / 紅</li>
+        <li><b>時速 XX</b>：目前即時車速；另有「均速」為整趟平均</li>
+      </ul>
+
+      <h2>收費規則（北北基 2023-04-01 起）</h2>
+      <table>
+        <tr><th>項目</th><th>規則</th></tr>
+        <tr><td>起跳</td><td>1.25 公里內 85 元</td></tr>
+        <tr><td>續程</td><td>每 200 公尺加 5 元</td></tr>
+        <tr><td>延滯計時</td><td>車速 &lt; 5 km/h 時，每 60 秒加 5 元（與續程不雙重計算）</td></tr>
+        <tr><td>夜間加成</td><td>23:00–06:00，每趟 +20（依上車時間判定）</td></tr>
+        <tr><td>春節加成</td><td>每趟 +30（手動開啟）</td></tr>
+        <tr><td>過路費</td><td>國道小客車約 1.2 元/公里，實報實付由乘客負擔</td></tr>
+      </table>
+
+      <h3>高速公路自動偵測</h3>
+      <p>採<b>純速度啟發式</b>：持續時速 ≥ 80 km/h 約 3 秒自動判定上高速並亮藍燈、開始累計過路費；降速一段時間自動熄燈。不查地圖、不連網、省流量。可用「高速公路」鈕手動覆寫。依北北基費率，<b>上高速跳表照跳不變</b>，差別只在 ETC 過路費。</p>
+
+      <h2>費率設定</h2>
+      <p>設定面板（右上 ⚙）可即時調整起跳、續程、延滯、夜間 / 春節加成、過路費，<b>自動記在手機本機</b>，調漲時不必改程式；附「還原預設（北北基）」。</p>
+
+      <h2>技術 / 部署</h2>
+      <p>Vite + TypeScript（strict）+ vite-plugin-pwa，無後端、無資料庫，全程瀏覽器端運算。靜態站以 Docker（nginx）部署於 Zeabur。</p>
+
+      <footer>
+        大台北計程車計費器 · 自用 / 估價工具 · <a href="/">回到計費器</a>
+      </footer>
+    </div>
+  </body>
+</html>
