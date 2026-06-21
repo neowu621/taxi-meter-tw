@@ -308,6 +308,30 @@ document.getElementById("reset-rate")!.addEventListener("click", () => {
 });
 fillRateForm();
 
+// ---- 全螢幕營業模式 ----
+function enterOperating() {
+  document.body.classList.add("op-active");
+  const p = document.documentElement.requestFullscreen?.();
+  if (p) {
+    p.then(() => (screen.orientation as unknown as { lock?: (o: string) => Promise<void> })?.lock?.("landscape")?.catch?.(() => {})).catch(() => {});
+  }
+}
+function exitOperating() {
+  document.body.classList.remove("op-active");
+  (screen.orientation as unknown as { unlock?: () => void })?.unlock?.();
+  if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => {});
+}
+document.getElementById("enter-op")!.addEventListener("click", enterOperating);
+document.getElementById("exit-op")!.addEventListener("click", exitOperating);
+// 全螢幕時點一下收據即可關閉
+($(".receipt") as HTMLElement).addEventListener("click", () => {
+  if (document.body.classList.contains("op-active")) ($(".receipt") as HTMLElement).hidden = true;
+});
+// 由瀏覽器手勢離開全螢幕時，同步退出營業模式
+document.addEventListener("fullscreenchange", () => {
+  if (!document.fullscreenElement) document.body.classList.remove("op-active");
+});
+
 reacquireWakeLockOnVisible(() => st.mode === "running");
 
 setInterval(() => {

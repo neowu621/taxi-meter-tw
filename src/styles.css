@@ -344,6 +344,161 @@ body {
   font-size: 12px;
 }
 
+/* ---- 全螢幕營業模式 ---- */
+.op-enter {
+  width: 100%;
+  margin-bottom: 12px;
+  background: #243042;
+  color: #cfe0ff;
+  border: 0.5px solid var(--hw);
+  border-radius: 9px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.op-exit {
+  display: none;
+}
+body.op-active {
+  overflow: hidden;
+}
+.op-active .topbar,
+.op-active .layout-toggle,
+.op-active .op-enter,
+.op-active .stats,
+.op-active .panel,
+.op-active .disclaimer,
+.op-active .device--portrait {
+  display: none !important;
+}
+.op-active #app {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.op-active .device--landscape {
+  display: flex !important;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: var(--frame);
+  z-index: 100;
+  padding: 2.4vmin;
+  gap: 1.8vmin;
+}
+@media (orientation: portrait) {
+  /* 手機直握：把橫向跳表轉 90° 填滿整個螢幕（像把手機橫架在車上） */
+  .op-active .device--landscape {
+    width: 100dvh;
+    height: 100vw;
+    left: 100vw;
+    transform-origin: top left;
+    transform: rotate(90deg);
+  }
+}
+@media (orientation: landscape) {
+  .op-active .device--landscape {
+    width: 100vw;
+    height: 100dvh;
+    left: 0;
+    transform: none;
+  }
+}
+.op-active .device--landscape .lcd {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3vmin 4vmin;
+  border-radius: 2vmin;
+}
+.op-active .device--landscape .lcd-main {
+  align-items: flex-start;
+}
+.op-active .device--landscape .timer {
+  font-size: 9vmin;
+}
+.op-active .device--landscape .fare,
+.op-active .device--landscape .ghost {
+  font-size: 30vmin;
+}
+.op-active .device--landscape .unit {
+  font-size: 5vmin;
+}
+.op-active .device--landscape .status {
+  font-size: 3.4vmin;
+}
+.op-active .device--landscape .lbl {
+  font-size: 2.7vmin;
+}
+.op-active .device--landscape .v-dist {
+  font-size: 7vmin;
+}
+.op-active .device--landscape .fees {
+  font-size: 3.2vmin;
+}
+.op-active .device--landscape .fees .seg {
+  font-size: 4.4vmin;
+}
+.op-active .device--landscape .lamp {
+  font-size: 3.2vmin;
+  padding: 1.3vmin;
+}
+.op-active .device--landscape .gps {
+  font-size: 3.2vmin;
+}
+.op-active .device--landscape .gps .bars {
+  height: 3.4vmin;
+}
+.op-active .device--landscape .gps .bars i {
+  width: 1vmin;
+}
+.op-active .device--landscape .keys {
+  gap: 1.6vmin;
+  margin-top: 0;
+}
+.op-active .device--landscape .key {
+  padding: 3.6vmin 2px;
+  font-size: 3.8vmin;
+  border-radius: 2vmin;
+}
+.op-active .device--landscape .key small {
+  font-size: 2.5vmin;
+}
+.op-active .op-exit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 1.6vmin;
+  right: 1.6vmin;
+  z-index: 110;
+  width: 7vmin;
+  height: 7vmin;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  font-size: 3.6vmin;
+  cursor: pointer;
+}
+.op-active .receipt:not([hidden]) {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  z-index: 300;
+  border-radius: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(8, 9, 11, 0.96);
+}
+
 .stats {
   display: flex;
   gap: 8px;
