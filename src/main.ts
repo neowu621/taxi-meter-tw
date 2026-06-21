@@ -91,6 +91,7 @@ function render() {
   setText("v-dist", (st.distanceM / 1000).toFixed(2));
   setText("v-toll", f.toll);
   setText("v-avg", st.elapsedSec > 0 ? Math.round(st.distanceM / 1000 / (st.elapsedSec / 3600)) : 0);
+  setText("v-speed", Math.round(currentSpeedKmh));
   setText("v-board", st.boardAt ? `${pad(new Date(st.boardAt).getHours())}:${pad(new Date(st.boardAt).getMinutes())}` : "--:--");
   setText("v-trips", stats.trips);
   setText("v-rev", stats.revenue.toLocaleString("en-US"));
@@ -98,6 +99,7 @@ function render() {
   setText("v-hwmode", st.highwayOverride === null ? "自動" : st.highwayOverride ? "手動開" : "手動關");
 
   const running = st.mode === "running";
+  document.body.classList.toggle("metering", running);
   all("act-start").forEach((b) => b.classList.toggle("is-running", running));
 
   const hw = highwayActive(st);
