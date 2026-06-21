@@ -311,20 +311,55 @@ document.getElementById("reset-rate")!.addEventListener("click", () => {
 fillRateForm();
 
 // ---- 全螢幕營業模式 ----
+const iosHint = document.getElementById("ios-hint") as HTMLElement;
+let iosHintTimer: number | null = null;
+function isIos(): boolean {
+  return (
+    /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+function isStandalone(): boolean {
+  return (
+    (navigator as unknown as { standalone?: boolean }).standalone === true ||
+    matchMedia("(display-mode: standalone)").matches
+  );
+}
+function hideIosHint() {
+  iosHint.hidden = true;
+  if (iosHintTimer) {
+    clearTimeout(iosHintTimer);
+    iosHintTimer = null;
+  }
+}
+function maybeShowIosHint() {
+  // iPhone/iPad 用 Safari（非主畫面模式）才提示「加到主畫面」可獲得真正全螢幕
+  if (!isIos() || isStandalone()) return;
+  if (localStorage.getItem("taxi-meter:iosHintDismissed")) return;
+  iosHint.hidden = false;
+  if (iosHintTimer) clearTimeout(iosHintTimer);
+  iosHintTimer = window.setTimeout(() => (iosHint.hidden = true), 8000);
+}
 function enterOperating() {
   document.body.classList.add("op-active");
   const p = document.documentElement.requestFullscreen?.();
   if (p) {
     p.then(() => (screen.orientation as unknown as { lock?: (o: string) => Promise<void> })?.lock?.("landscape")?.catch?.(() => {})).catch(() => {});
   }
+  maybeShowIosHint();
 }
 function exitOperating() {
   document.body.classList.remove("op-active");
+  hideIosHint();
   (screen.orientation as unknown as { unlock?: () => void })?.unlock?.();
   if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => {});
 }
 document.getElementById("enter-op")!.addEventListener("click", enterOperating);
 document.getElementById("exit-op")!.addEventListener("click", exitOperating);
+document.getElementById("ios-hint-close")!.addEventListener("click", () => {
+  localStorage.setItem("taxi-meter:iosHintDismissed", "1");
+  hideIosHint();
+});
 // 全螢幕時點一下收據即可關閉
 ($(".receipt") as HTMLElement).addEventListener("click", () => {
   if (document.body.classList.contains("op-active")) ($(".receipt") as HTMLElement).hidden = true;
