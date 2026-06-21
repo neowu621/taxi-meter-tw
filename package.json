@@ -1,9 +1,9 @@
 {
-  "name": "taxi-meter-tw",
+  "name": "laowu-taxi-meter",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "大台北計程車手機網頁計費器（自用/估價）— Vite + TS PWA",
+  "description": "Laowu 計程車手機網頁計費器（自用/估價，全台各區費率）— Vite + TS PWA",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

@@ -16,9 +16,9 @@ export default defineConfig({
         "fonts/DSEG7Classic-Bold.woff2",
       ],
       manifest: {
-        name: "大台北計程車計費器",
-        short_name: "計費器",
-        description: "大台北計程車計費器（自用/估價）",
+        name: "Laowu 計程車計費器",
+        short_name: "Laowu計費器",
+        description: "Laowu 計程車計費器（自用/估價，全台各區費率）",
         lang: "zh-Hant-TW",
         theme_color: "#15171a",
         background_color: "#15171a",

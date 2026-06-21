@@ -1,5 +1,5 @@
-// 趟次狀態 + 今日統計（localStorage 持久化）+ 費率覆寫。
-import { RateConfig, TAIPEI_RATE } from "./fare.ts";
+// 趟次狀態 + 今日統計 + 行程紀錄 + 區域/費率（localStorage 持久化，依本機保存）。
+import { RateConfig, TAIPEI_RATE, regionByKey, rateOf, DEFAULT_REGION_KEY } from "./fare.ts";
 
 export type MeterMode = "idle" | "running" | "stopped";
 
@@ -105,12 +105,81 @@ export function loadRate(): RateConfig {
   } catch {
     /* ignore */
   }
-  return { ...TAIPEI_RATE };
+  return rateOf(regionByKey(loadRegionKey()));
 }
 
 export function saveRate(r: RateConfig): void {
   try {
     localStorage.setItem(RATE_KEY, JSON.stringify(r));
+  } catch {
+    /* ignore */
+  }
+}
+
+// ---- 選定區域 ----
+const REGION_KEY = "taxi-meter:region";
+export function loadRegionKey(): string {
+  try {
+    return localStorage.getItem(REGION_KEY) || DEFAULT_REGION_KEY;
+  } catch {
+    return DEFAULT_REGION_KEY;
+  }
+}
+export function saveRegionKey(key: string): void {
+  try {
+    localStorage.setItem(REGION_KEY, key);
+  } catch {
+    /* ignore */
+  }
+}
+
+// ---- 本機識別碼（區別不同手機的紀錄） ----
+const DEVICE_KEY = "taxi-meter:deviceId";
+export function getDeviceId(): string {
+  try {
+    let id = localStorage.getItem(DEVICE_KEY);
+    if (!id) {
+      id = crypto.randomUUID
+        ? crypto.randomUUID()
+        : String(Date.now()) + Math.random().toString(16).slice(2);
+      localStorage.setItem(DEVICE_KEY, id);
+    }
+    return id;
+  } catch {
+    return "unknown";
+  }
+}
+
+// ---- 行程紀錄（本機保存） ----
+const HISTORY_KEY = "taxi-meter:history";
+export interface TripRecord {
+  t: number; // 完成時間
+  fare: number;
+  km: number;
+  sec: number;
+}
+export function loadHistory(): TripRecord[] {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]") as TripRecord[];
+  } catch {
+    return [];
+  }
+}
+export function addTripRecord(rec: TripRecord): void {
+  try {
+    const h = loadHistory();
+    h.push(rec);
+    if (h.length > 500) h.splice(0, h.length - 500); // 上限 500 筆
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+  } catch {
+    /* ignore */
+  }
+}
+/** 清除本機所有紀錄（行程紀錄 + 今日統計）。 */
+export function clearAllRecords(): void {
+  try {
+    localStorage.removeItem(HISTORY_KEY);
+    localStorage.removeItem(STATS_KEY);
   } catch {
     /* ignore */
   }

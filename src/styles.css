@@ -158,46 +158,47 @@ body {
 }
 .lcd-main {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 2px 0;
 }
 .lbl {
   font-size: 10px;
   opacity: 0.7;
 }
-.timer {
-  font-size: 24px;
-  line-height: 1.2;
-}
-.fare-box {
-  text-align: right;
-  white-space: nowrap;
+.fare-label {
+  margin-right: auto;
+  align-self: flex-start;
+  font-size: 12px;
+  opacity: 0.75;
 }
 .fare-wrap {
   position: relative;
   display: inline-block;
+  font-size: 68px;
+  line-height: 0.92;
 }
 .ghost {
   position: absolute;
   right: 0;
   top: 0;
+  font-size: 1em;
   color: var(--lcd-ink);
   opacity: 0.1;
   pointer-events: none;
 }
 .fare {
   position: relative;
-  font-size: 52px;
-  line-height: 0.95;
+  font-size: 1em;
 }
 .unit {
-  font-size: 15px;
+  font-size: 16px;
 }
 .lcd-sub {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: baseline;
   margin-top: 6px;
   border-top: 1px dashed rgba(20, 33, 10, 0.25);
   padding-top: 6px;
@@ -205,13 +206,9 @@ body {
 .dist .seg {
   font-size: 18px;
 }
-.fees {
-  text-align: right;
-  font-size: 11px;
-  line-height: 1.55;
-}
-.fees .seg {
-  font-size: 13px;
+.toll .seg {
+  font-size: 26px;
+  font-weight: 700;
 }
 .gps {
   font-size: 10px;
@@ -456,18 +453,12 @@ body.op-active {
   align-items: center;
   gap: 3vmin;
 }
-.op-active .device--landscape .timer-box {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.8vmin;
+.op-active .device--landscape .fare-wrap {
+  font-size: 42vmin;
 }
-.op-active .device--landscape .timer {
-  font-size: 10vmin;
-}
-.op-active .device--landscape .fare,
-.op-active .device--landscape .ghost {
-  font-size: 38vmin;
+.op-active .device--landscape .fare-label {
+  font-size: 3.4vmin;
+  align-self: center;
 }
 .op-active .device--landscape .unit {
   font-size: 6vmin;
@@ -496,11 +487,8 @@ body.op-active {
 .op-active .device--landscape .v-dist {
   font-size: 7vmin;
 }
-.op-active .device--landscape .fees {
-  font-size: 3.2vmin;
-}
-.op-active .device--landscape .fees .seg {
-  font-size: 4.4vmin;
+.op-active .device--landscape .toll .seg {
+  font-size: 7vmin;
 }
 .op-active .device--landscape .lamp {
   font-size: 3.2vmin;
@@ -713,6 +701,20 @@ body.op-active {
   background: #1d2430;
   color: #9fc0e7;
   border-color: #2c3a4a;
+}
+.reset--danger {
+  background: #3a1414;
+  color: #f0a0a0;
+  border-color: #5a2020;
+}
+.rec-count {
+  font-weight: 500;
+}
+#device-id {
+  font-size: 10px;
+  color: #5f6368;
+  font-weight: 400;
+  font-family: var(--font-mono);
 }
 #app:not(.sim) .sim-only {
   display: none;

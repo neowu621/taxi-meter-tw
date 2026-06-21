@@ -11,12 +11,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>大台北計程車計費器</title>
+    <title>Laowu 計程車計費器</title>
   </head>
   <body>
     <div id="app">
       <header class="topbar">
-        <span class="brand"><span class="brand-dot"></span> 計程車計費器</span>
+        <span class="brand"><span class="brand-dot"></span> Laowu 計程車計費器</span>
         <div class="topbar-right">
           <span class="ver" id="ver">v—</span>
           <button class="icon-btn" id="open-settings" aria-label="設定">⚙</button>
@@ -40,28 +40,16 @@
             <span class="clock v-clock">--:--:--</span>
           </div>
           <div class="lcd-main">
-            <div class="timer-box">
-              <div class="lbl">本趟計時</div>
-              <div class="seg v-time timer">00:00:00</div>
-            </div>
-            <div class="fare-box">
-              <span class="lbl"><span class="run-dot" aria-hidden="true"></span>車資</span>
-              <span class="fare-wrap">
-                <span class="seg ghost">8888</span>
-                <span class="seg v-fare fare">85</span>
-              </span>
-              <span class="unit">元</span>
-            </div>
+            <span class="fare-label"><span class="run-dot" aria-hidden="true"></span>車資</span>
+            <span class="fare-wrap">
+              <span class="seg ghost">8888</span>
+              <span class="seg v-fare fare">85</span>
+            </span>
+            <span class="unit">元</span>
           </div>
           <div class="lcd-sub">
-            <div class="dist">
-              <span class="lbl">里程</span>
-              <span class="seg v-dist">0.00</span><span class="lbl">km</span>
-            </div>
-            <div class="fees">
-              <div>通行費 <span class="seg v-toll">0</span> 元</div>
-              <div>均速 <span class="seg v-avg">0</span> km/h</div>
-            </div>
+            <div class="dist"><span class="lbl">里程</span> <span class="seg v-dist">0.00</span><span class="lbl">km</span></div>
+            <div class="toll"><span class="lbl">通行費</span> <span class="seg v-toll">0</span><span class="lbl">元</span></div>
           </div>
           <div class="lcd-gpsline">
             <span class="gps v-gps"><span class="bars"><i></i><i></i><i></i></span><span class="v-gpstxt">待定位</span><span class="gps-spd"><span class="seg v-speed">0</span> km/h</span></span>
@@ -84,36 +72,29 @@
       <section class="device device--landscape" data-view="landscape" hidden>
         <button class="op-exit" id="exit-op" type="button" aria-label="結束全螢幕">✕</button>
         <div class="lcd">
+          <div class="lcd-top">
+            <span class="status v-status">空車待命</span>
+            <span class="board">上車 <span class="v-board">--:--</span></span>
+            <span class="clock v-clock">--:--:--</span>
+          </div>
           <div class="lcd-main">
-            <div class="timer-box">
-              <span class="status v-status">空車待命</span>
-              <div class="lbl">本趟計時</div>
-              <div class="seg v-time timer">00:00:00</div>
-            </div>
-            <div class="fare-box">
-              <span class="lbl"><span class="run-dot" aria-hidden="true"></span>車資</span>
-              <span class="fare-wrap">
-                <span class="seg ghost">8888</span>
-                <span class="seg v-fare fare">85</span>
-              </span>
-              <span class="unit">元</span>
-            </div>
+            <span class="fare-label"><span class="run-dot" aria-hidden="true"></span>車資</span>
+            <span class="fare-wrap">
+              <span class="seg ghost">8888</span>
+              <span class="seg v-fare fare">85</span>
+            </span>
+            <span class="unit">元</span>
           </div>
           <div class="lcd-sub">
-            <div class="dist">
-              <span class="lbl">里程</span>
-              <span class="seg v-dist">0.00</span><span class="lbl">km</span>
-              <span class="lbl">均速 <span class="seg v-avg">0</span></span>
-              <span class="gps v-gps"><span class="bars"><i></i><i></i><i></i></span><span class="v-gpstxt">待定位</span><span class="gps-spd"><span class="seg v-speed">0</span> km/h</span></span>
-            </div>
-            <div class="fees">
-              <div>通行費 <span class="seg v-toll">0</span> 元</div>
-              <div>上車 <span class="v-board">--:--</span></div>
-            </div>
+            <div class="dist"><span class="lbl">里程</span> <span class="seg v-dist">0.00</span><span class="lbl">km</span></div>
+            <div class="toll"><span class="lbl">通行費</span> <span class="seg v-toll">0</span><span class="lbl">元</span></div>
           </div>
-          <div class="lamps">
-            <span class="lamp lamp-period">日間</span>
-            <span class="lamp lamp-hw">一般道路</span>
+          <div class="lcd-gpsline">
+            <span class="gps v-gps"><span class="bars"><i></i><i></i><i></i></span><span class="v-gpstxt">待定位</span><span class="gps-spd"><span class="seg v-speed">0</span> km/h</span></span>
+            <span class="lamps">
+              <span class="lamp lamp-period">日間</span>
+              <span class="lamp lamp-hw">一般道路</span>
+            </span>
           </div>
         </div>
         <div class="keys">
@@ -135,6 +116,10 @@
       <details class="panel" id="settings">
         <summary>測試 / 設定</summary>
         <div class="panel-body">
+          <label class="row">
+            <span>營業區域</span>
+            <select id="region"></select>
+          </label>
           <label class="row">
             <span>定位來源</span>
             <select id="src-mode">
@@ -164,12 +149,16 @@
             <label>每跳金額 (元)<input type="number" inputmode="numeric" id="r-stepFare" /></label>
             <label>延滯秒數 (s)<input type="number" inputmode="numeric" id="r-slowStepSec" /></label>
             <label>夜間加成 (元)<input type="number" inputmode="numeric" id="r-nightSurcharge" /></label>
+            <label>夜間加成 (%)<input type="number" inputmode="numeric" id="r-nightPct" /></label>
             <label>春節加成 (元)<input type="number" inputmode="numeric" id="r-cnySurcharge" /></label>
             <label>過路費 (元/km)<input type="number" inputmode="decimal" step="0.1" id="r-tollPerKm" /></label>
           </div>
-          <button class="reset reset--rate" id="reset-rate" type="button">還原預設費率（北北基）</button>
+          <button class="reset reset--rate" id="reset-rate" type="button">還原所選區域預設費率</button>
 
+          <div class="subhead">本機紀錄<small id="device-id">—</small></div>
+          <div class="row"><span>已保存行程</span><span class="rec-count" id="rec-count">0</span> 趟</div>
           <button class="reset" id="reset-stats" type="button">歸零今日統計</button>
+          <button class="reset reset--danger" id="clear-records" type="button">清除本機所有紀錄</button>
         </div>
       </details>
 

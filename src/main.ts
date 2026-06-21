@@ -1,6 +1,6 @@
 import "./styles.css";
 import { APP_VERSION } from "./version.ts";
-import { calcFare, isNightTime, TAIPEI_RATE, type RateConfig } from "./fare.ts";
+import { calcFare, isNightTime, REGIONS, regionByKey, rateOf, type RateConfig } from "./fare.ts";
 import {
   GeoTracker,
   requestWakeLock,
@@ -18,6 +18,12 @@ import {
   saveRate,
   recordTrip,
   resetStats,
+  loadRegionKey,
+  saveRegionKey,
+  getDeviceId,
+  addTripRecord,
+  loadHistory,
+  clearAllRecords,
   type TripState,
 } from "./state.ts";
 
@@ -96,11 +102,9 @@ function setGpsLabel(text: string) {
 
 function render() {
   const f = fare();
-  setText("v-time", clock(st.elapsedSec));
   setText("v-fare", f.total);
   setText("v-dist", (st.distanceM / 1000).toFixed(2));
   setText("v-toll", f.toll);
-  setText("v-avg", st.elapsedSec > 0 ? Math.round(st.distanceM / 1000 / (st.elapsedSec / 3600)) : 0);
   setText("v-speed", Math.round(currentSpeedKmh));
   setText("v-board", st.boardAt ? `${pad(new Date(st.boardAt).getHours())}:${pad(new Date(st.boardAt).getMinutes())}` : "--:--");
   setText("v-trips", stats.trips);
@@ -211,7 +215,10 @@ function onStop() {
 function onClear() {
   // 結算本趟（有上車且有產生車資才計入今日統計）
   if (st.boardAt && fare().total > rate.baseFare) {
-    stats = recordTrip(fare().total);
+    const total = fare().total;
+    stats = recordTrip(total);
+    addTripRecord({ t: Date.now(), fare: total, km: st.distanceM / 1000, sec: st.elapsedSec });
+    updateRecCount();
   }
   stopLoop();
   void releaseWakeLock();
@@ -240,7 +247,8 @@ function onPrint() {
     row("計時", clock(st.elapsedSec)) +
     row("總里程", (st.distanceM / 1000).toFixed(2) + " km") +
     row("其中高速里程", (st.highwayM / 1000).toFixed(2) + " km") +
-    row(`起跳${effectiveNight() ? "（夜間 105）" : "（85）"}`, f.base + f.nightSurcharge + " 元") +
+    row("起跳", f.base + " 元") +
+    (f.nightSurcharge ? row("夜間加成", f.nightSurcharge + " 元") : "") +
     (f.cnySurcharge ? row("春節加成", f.cnySurcharge + " 元") : "") +
     row("續程里程", f.distanceFare + " 元") +
     row("延滯計時", f.timeFare + " 元") +
@@ -316,6 +324,7 @@ const RATE_FIELDS: (keyof RateConfig)[] = [
   "stepFare",
   "slowStepSec",
   "nightSurcharge",
+  "nightPct",
   "cnySurcharge",
   "tollPerKm",
 ];
@@ -337,12 +346,51 @@ RATE_FIELDS.forEach((k) => {
   });
 });
 document.getElementById("reset-rate")!.addEventListener("click", () => {
-  Object.assign(rate, TAIPEI_RATE);
+  Object.assign(rate, rateOf(regionByKey(loadRegionKey())));
   saveRate(rate);
   fillRateForm();
   render();
 });
 fillRateForm();
+
+// ---- 營業區域選單 ----
+const regionSel = document.getElementById("region") as HTMLSelectElement;
+REGIONS.forEach((r) => {
+  const o = document.createElement("option");
+  o.value = r.key;
+  o.textContent = r.name;
+  regionSel.appendChild(o);
+});
+regionSel.value = loadRegionKey();
+regionSel.addEventListener("change", () => {
+  saveRegionKey(regionSel.value);
+  Object.assign(rate, rateOf(regionByKey(regionSel.value)));
+  saveRate(rate);
+  fillRateForm();
+  render();
+});
+
+// ---- 本機紀錄 ----
+function updateRecCount() {
+  setText("rec-count", loadHistory().length);
+}
+(document.getElementById("device-id") as HTMLElement).textContent = getDeviceId().slice(0, 8);
+updateRecCount();
+document.getElementById("clear-records")!.addEventListener("click", () => {
+  if (confirm("確定清除本機所有行程紀錄與今日統計？此動作無法復原。")) {
+    clearAllRecords();
+    stats = loadStats();
+    updateRecCount();
+    render();
+  }
+});
+
+// ---- 設定齒輪：展開設定面板 ----
+document.getElementById("open-settings")!.addEventListener("click", () => {
+  const panel = document.getElementById("settings") as HTMLDetailsElement;
+  panel.open = true;
+  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+});
 
 // ---- 全螢幕營業模式 ----
 const iosHint = document.getElementById("ios-hint") as HTMLElement;
