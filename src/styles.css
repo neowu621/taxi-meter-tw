@@ -214,30 +214,69 @@ body {
   font-size: 13px;
 }
 .gps {
-  font-size: 9px;
-  margin-left: 4px;
-  opacity: 0.8;
+  font-size: 10px;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
+  color: var(--lcd-ink);
+  white-space: nowrap;
 }
-.gps .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+.gps .bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 11px;
+}
+.gps .bars i {
+  width: 3px;
+  border-radius: 1px;
+  background: rgba(20, 33, 10, 0.22);
+}
+.gps .bars i:nth-child(1) {
+  height: 4px;
+}
+.gps .bars i:nth-child(2) {
+  height: 7px;
+}
+.gps .bars i:nth-child(3) {
+  height: 11px;
+}
+.gps.good .bars i.lit {
   background: #1f7a1f;
 }
-.gps.weak .dot {
+.gps.weak .bars i.lit {
   background: #b8860b;
 }
-.gps.lost .dot {
+.gps.lost .bars i.lit {
   background: #a32d2d;
+}
+.gps.searching .v-gpstxt {
+  animation: gpsblink 1s infinite;
+}
+@keyframes gpsblink {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.lcd-gpsline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
 }
 .lamps {
   display: flex;
   gap: 6px;
   margin-top: 7px;
   align-items: center;
+}
+.lcd-gpsline .lamps {
+  margin-top: 0;
+  flex: 1;
 }
 .lamp {
   flex: 1;
@@ -421,6 +460,46 @@ body {
   padding: 9px;
   font-size: 12px;
   cursor: pointer;
+}
+.subhead {
+  margin: 14px 0 8px;
+  padding-top: 12px;
+  border-top: 0.5px solid #2c2f33;
+  font-size: 12px;
+  color: #aeb4ba;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.subhead small {
+  color: #6b7077;
+}
+.rate-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.rate-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: #9aa0a6;
+}
+.rate-grid input {
+  width: 100%;
+  background: #0f1113;
+  border: 0.5px solid #2c2f33;
+  color: #e8eaed;
+  border-radius: 7px;
+  padding: 8px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.reset--rate {
+  background: #1d2430;
+  color: #9fc0e7;
+  border-color: #2c3a4a;
 }
 #app:not(.sim) .sim-only {
   display: none;

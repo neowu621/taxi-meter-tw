@@ -2,6 +2,14 @@
 
 版本格式：`YYYYMMDD_NN`（NN 為全域單調遞增計數器，每次發佈 +1，跨日不重置）。
 
+## 20260621_02 — GPS 訊號顯示 + PNG 圖示 + 費率設定 UI
+
+- GPS 狀態強化：訊號格(▮▮▮)＋精度公尺數，未定位顯示「定位中…」(閃爍)，弱/斷號變色；直向橫向都有。
+- 高速公路燈號移到燈列最右側；上車時間移到頂列。
+- PNG 圖示：由 SVG 產生 192/512/apple-touch(180)，七段字「85」改為向量(免字型)；manifest 加入 PNG(含 maskable)、iOS apple-touch-icon 用 PNG。
+- 費率設定 UI：設定面板可即時調整起跳/續程/延滯/夜間/春節/過路費，存 localStorage，附「還原預設」。
+- `scripts/gen-icons.mjs` 一次性圖示產生器（需臨時裝 sharp）。
+
 ## 20260621_01 — 修正 Zeabur 部署服務埠
 
 - nginx 改監聽 8080（Zeabur 預設 HTTP 服務埠），Dockerfile `EXPOSE 8080`。

@@ -1,13 +1,20 @@
 import "./styles.css";
 import { APP_VERSION } from "./version.ts";
-import { calcFare, isNightTime } from "./fare.ts";
-import { GeoTracker, requestWakeLock, releaseWakeLock, reacquireWakeLockOnVisible } from "./geo.ts";
+import { calcFare, isNightTime, TAIPEI_RATE, type RateConfig } from "./fare.ts";
+import {
+  GeoTracker,
+  requestWakeLock,
+  releaseWakeLock,
+  reacquireWakeLockOnVisible,
+  type GeoSample,
+} from "./geo.ts";
 import { HighwayDetector } from "./highway.ts";
 import {
   newTrip,
   highwayActive,
   loadStats,
   loadRate,
+  saveRate,
   recordTrip,
   resetStats,
   type TripState,
@@ -25,7 +32,7 @@ let timer: number | null = null;
 const detector = new HighwayDetector();
 const tracker = new GeoTracker((s) => {
   currentSpeedKmh = s.speedKmh;
-  setGpsQuality(s.quality);
+  updateGps(s);
   if (st.mode === "running" && s.speedKmh >= rate.slowSpeedKmh) {
     st.distanceM += s.distanceDelta;
     if (highwayActive(st)) st.highwayM += s.distanceDelta;
@@ -51,10 +58,29 @@ function fare() {
   );
 }
 
-function setGpsQuality(q: "good" | "weak" | "lost") {
+// 訊號格：依精度(公尺)決定亮幾格，並顯示精度數字；未定位時顯示「定位中…」。
+function updateGps(s: GeoSample) {
+  let level = 0;
+  if (s.accuracy <= 15) level = 3;
+  else if (s.accuracy <= 35) level = 2;
+  else if (s.accuracy <= 80) level = 1;
+  const searching = s.accuracy >= 999;
+  const txt = searching ? "定位中…" : `${Math.round(s.accuracy)}m`;
   all("v-gps").forEach((e) => {
-    e.classList.remove("weak", "lost");
-    if (q !== "good") e.classList.add(q);
+    e.classList.remove("good", "weak", "lost", "searching");
+    e.classList.add(searching ? "searching" : s.quality);
+    e.querySelectorAll(".bars i").forEach((b, i) => b.classList.toggle("lit", i < level));
+    const t = e.querySelector(".v-gpstxt");
+    if (t) t.textContent = txt;
+  });
+}
+
+function setGpsLabel(text: string) {
+  all("v-gps").forEach((e) => {
+    e.classList.remove("good", "weak", "lost", "searching");
+    e.querySelectorAll(".bars i").forEach((b) => b.classList.remove("lit"));
+    const t = e.querySelector(".v-gpstxt");
+    if (t) t.textContent = text;
   });
 }
 
@@ -125,7 +151,10 @@ function onStart() {
   }
   st.mode = "running";
   ($(".receipt") as HTMLElement).hidden = true;
-  if (sourceMode === "gps") tracker.start();
+  if (sourceMode === "gps") {
+    tracker.start();
+    updateGps({ distanceDelta: 0, speedKmh: 0, accuracy: 9999, quality: "lost" });
+  }
   void requestWakeLock();
   startLoop();
   render();
@@ -207,9 +236,16 @@ const srcSel = document.getElementById("src-mode") as HTMLSelectElement;
 srcSel.addEventListener("change", () => {
   sourceMode = srcSel.value as "gps" | "sim";
   document.getElementById("app")!.classList.toggle("sim", sourceMode === "sim");
-  if (st.mode === "running") {
-    if (sourceMode === "gps") tracker.start();
-    else tracker.stop();
+  if (sourceMode === "sim") {
+    tracker.stop();
+    setGpsLabel("模擬");
+  } else {
+    if (st.mode === "running") {
+      tracker.start();
+      updateGps({ distanceDelta: 0, speedKmh: 0, accuracy: 9999, quality: "lost" });
+    } else {
+      setGpsLabel("待定位");
+    }
   }
 });
 
@@ -235,6 +271,42 @@ document.getElementById("reset-stats")!.addEventListener("click", () => {
   stats = resetStats();
   render();
 });
+
+// ---- 費率設定表單 ----
+const RATE_FIELDS: (keyof RateConfig)[] = [
+  "baseFare",
+  "baseDistance",
+  "stepDistance",
+  "stepFare",
+  "slowStepSec",
+  "nightSurcharge",
+  "cnySurcharge",
+  "tollPerKm",
+];
+function fillRateForm() {
+  RATE_FIELDS.forEach((k) => {
+    const el = document.getElementById("r-" + k) as HTMLInputElement | null;
+    if (el) el.value = String(rate[k]);
+  });
+}
+RATE_FIELDS.forEach((k) => {
+  const el = document.getElementById("r-" + k) as HTMLInputElement | null;
+  el?.addEventListener("input", () => {
+    const v = parseFloat(el.value);
+    if (!Number.isNaN(v) && v >= 0) {
+      rate[k] = v;
+      saveRate(rate);
+      render();
+    }
+  });
+});
+document.getElementById("reset-rate")!.addEventListener("click", () => {
+  Object.assign(rate, TAIPEI_RATE);
+  saveRate(rate);
+  fillRateForm();
+  render();
+});
+fillRateForm();
 
 reacquireWakeLockOnVisible(() => st.mode === "running");
 

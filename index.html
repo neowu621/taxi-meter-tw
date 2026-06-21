@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="apple-touch-icon" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>大台北計程車計費器</title>
   </head>
   <body>
@@ -34,6 +34,7 @@
         <div class="lcd">
           <div class="lcd-top">
             <span class="status v-status">空車待命</span>
+            <span class="board">上車 <span class="v-board">--:--</span></span>
             <span class="clock v-clock">--:--:--</span>
           </div>
           <div class="lcd-main">
@@ -54,17 +55,18 @@
             <div class="dist">
               <span class="lbl">里程</span>
               <span class="seg v-dist">0.00</span><span class="lbl">km</span>
-              <span class="gps v-gps"><span class="dot"></span>GPS</span>
             </div>
             <div class="fees">
               <div>通行費 <span class="seg v-toll">0</span> 元</div>
               <div>均速 <span class="seg v-avg">0</span> km/h</div>
             </div>
           </div>
-          <div class="lamps">
-            <span class="lamp lamp-hw">一般道路</span>
-            <span class="lamp lamp-period">日間</span>
-            <span class="board">上車 <span class="v-board">--:--</span></span>
+          <div class="lcd-gpsline">
+            <span class="gps v-gps"><span class="bars"><i></i><i></i><i></i></span><span class="v-gpstxt">待定位</span></span>
+            <span class="lamps">
+              <span class="lamp lamp-period">日間</span>
+              <span class="lamp lamp-hw">一般道路</span>
+            </span>
           </div>
         </div>
         <div class="keys">
@@ -99,6 +101,7 @@
               <span class="lbl">里程</span>
               <span class="seg v-dist">0.00</span><span class="lbl">km</span>
               <span class="lbl">均速 <span class="seg v-avg">0</span></span>
+              <span class="gps v-gps"><span class="bars"><i></i><i></i><i></i></span><span class="v-gpstxt">待定位</span></span>
             </div>
             <div class="fees">
               <div>通行費 <span class="seg v-toll">0</span> 元</div>
@@ -106,8 +109,8 @@
             </div>
           </div>
           <div class="lamps">
-            <span class="lamp lamp-hw">一般道路</span>
             <span class="lamp lamp-period">日間</span>
+            <span class="lamp lamp-hw">一般道路</span>
           </div>
         </div>
         <div class="keys">
@@ -149,6 +152,20 @@
           </div>
           <label class="row"><span>春節加成 (+30)</span><input type="checkbox" id="cny" /></label>
           <label class="row"><span>強制夜間時段</span><input type="checkbox" id="night-force" /></label>
+
+          <div class="subhead">費率設定<small>調漲時改這裡，會自動記住</small></div>
+          <div class="rate-grid">
+            <label>起跳價 (元)<input type="number" inputmode="numeric" id="r-baseFare" /></label>
+            <label>起跳距離 (m)<input type="number" inputmode="numeric" id="r-baseDistance" /></label>
+            <label>續程間距 (m)<input type="number" inputmode="numeric" id="r-stepDistance" /></label>
+            <label>每跳金額 (元)<input type="number" inputmode="numeric" id="r-stepFare" /></label>
+            <label>延滯秒數 (s)<input type="number" inputmode="numeric" id="r-slowStepSec" /></label>
+            <label>夜間加成 (元)<input type="number" inputmode="numeric" id="r-nightSurcharge" /></label>
+            <label>春節加成 (元)<input type="number" inputmode="numeric" id="r-cnySurcharge" /></label>
+            <label>過路費 (元/km)<input type="number" inputmode="decimal" step="0.1" id="r-tollPerKm" /></label>
+          </div>
+          <button class="reset reset--rate" id="reset-rate" type="button">還原預設費率（北北基）</button>
+
           <button class="reset" id="reset-stats" type="button">歸零今日統計</button>
         </div>
       </details>
