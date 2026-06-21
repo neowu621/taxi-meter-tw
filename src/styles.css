@@ -416,7 +416,8 @@ body.op-active {
   border-radius: 0;
   background: var(--frame);
   z-index: 100;
-  padding: 2.4vmin;
+  padding: max(2.4vmin, env(safe-area-inset-top)) max(2.4vmin, env(safe-area-inset-right))
+    max(2.4vmin, env(safe-area-inset-bottom)) max(2.4vmin, env(safe-area-inset-left));
   gap: 1.8vmin;
 }
 @media (orientation: portrait) {
@@ -441,26 +442,36 @@ body.op-active {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 3vmin 4vmin;
+  justify-content: flex-start;
+  gap: 1.4vmin;
+  padding: 2.5vmin 4vmin;
   border-radius: 2vmin;
 }
+/* 車資為主角：lcd-main 撐滿、垂直置中，巨大車資靠右 */
 .op-active .device--landscape .lcd-main {
-  align-items: flex-start;
+  flex: 1;
+  align-items: center;
   gap: 3vmin;
 }
 .op-active .device--landscape .timer-box {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.6vmin;
+  gap: 0.8vmin;
 }
 .op-active .device--landscape .timer {
-  font-size: 8.5vmin;
+  font-size: 10vmin;
 }
 .op-active .device--landscape .fare,
 .op-active .device--landscape .ghost {
-  font-size: 25vmin;
+  font-size: 38vmin;
+}
+.op-active .device--landscape .unit {
+  font-size: 6vmin;
+}
+/* 次要資訊壓在底部一帶 */
+.op-active .device--landscape .lcd-sub {
+  flex: none;
 }
 .op-active .device--landscape .run-dot {
   width: 3vmin;
